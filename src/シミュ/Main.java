@@ -87,7 +87,7 @@ public class Main {
 		int[][] BussTimeTable = new int [data.length][2];
 		BussTimeTable = test1.timetable(data, BussTimeTable);
 		System.out.println("時間		待ち人数		高坂住到着		電車到着		バス到着");
-		for(int i=0;i<2000;i++){
+		for(int i=0;i<1000;i++){
 			int trainflag=0,bussflag=0,takasakaflag=0;
 			//時間処理
 			sec=i;
@@ -150,12 +150,12 @@ public class Main {
 			}
 			//電車民を列に加える処理
 			//30秒で20人通過ー＞1秒0.66人->10秒7人くらい
-			//2分乗り換え
-			if ((plus2==time[1]&&time[2]==plus30)||buffflag==1) {
+			//1分半乗り換え
+			if ((plus2==time[1])||buffflag==1) {
 				buffflag=1;
 				//buff!=0
-				//buff!=0&&time[1]%2==0
-				if (buff!=0) {
+				//buff!=0&&time[2]%2==0
+				if (buff!=0&&time[2]%2==0) {
 					len++;
 					buff--;	
 					if (buff==0) {
@@ -225,7 +225,7 @@ public class Main {
 				IsBussExisting=0;
 			}
 			
-			//1人/秒でバスに乗り込む
+			//バスに乗り込む
 			if (time[2]%2==0) {
 				if ((len>0&&BussPassenger>0)&&IsBussExisting==1) {
 					len--;
@@ -235,6 +235,7 @@ public class Main {
 			
 			if (time[2]%10==0) {
 				System.out.println(time[0]+":"+time[1]+":"+time[2]+"		"+len+"		"+takasakaflag+"		"+trainflag+"		"+bussflag);
+				//System.out.println("収容可能人数"+BussPassenger);
 				pw.println(time[0]+":"+time[1]+":"+time[2]+","+len);
 			}
 		}
