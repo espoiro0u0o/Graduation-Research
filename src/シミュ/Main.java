@@ -53,6 +53,19 @@ class readcsv{
 	}
 	
 }
+//指数分布と秒計算
+class index{
+	int[] distribution(int lambda){
+		double tau;
+		int data[] = new int[2];
+		tau = -lambda * Math.log(1.0 -Math.random());
+		data[0] = (int)tau;
+		tau = tau-(int)tau;
+		tau = tau*60;
+		data[1] = (int)tau;
+		return data;
+	}
+}
 
 public class Main {
 	public static void main(String args[]){
@@ -66,12 +79,13 @@ public class Main {
 			e.printStackTrace();
 		}  
         PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
-		int[] time = new int[3];
+		int[] time = new int[4];
 		time[0] = 8;
 		time[1] = 52;
 		time[2] = 0;
+		time[3] = 0;
 		int[] BussExit = new int[3];
-		int sec;
+		int sec,msec;
 		int BussPassenger=0,BussBuff=0,IsBussExisting=0;
 		int len = 0,buffflag=0;
 		int j=0,k=0,buff=0,plus2=0,minus2=0,plus30=30%60;
@@ -86,11 +100,34 @@ public class Main {
 		data = test1.read1(data,buss);
 		int[][] BussTimeTable = new int [data.length][2];
 		BussTimeTable = test1.timetable(data, BussTimeTable);
+		int test[];
+		index sisu = new index();
+		test = sisu.distribution(1);
+		System.out.println(test[0]+":"+test[1]);
 		System.out.println("時間		待ち人数		高坂住到着		電車到着		バス到着");
-		for(int i=0;i<1000;i++){
+		//i=1630->9:18
+		for(int i=0;i<95000;i++){
 			int trainflag=0,bussflag=0,takasakaflag=0;
 			//時間処理
-			sec=i;
+			msec = i;
+			while(msec>60){
+				msec = msec-60;
+			}
+			time[3] = msec;
+			if (time[3]==60) {
+				time[2]++;
+				sec = time[2];
+				time[3]=0;
+			}
+			if (time[2]==60) {
+				time[1]++;
+				time[2]=0;
+			}
+			if (time[1]==60) {
+				time[0]++;
+				time[1]=0;
+			}
+			/*sec=i;
 			while(sec>60){
 				sec = sec-60;
 			}
@@ -102,7 +139,7 @@ public class Main {
 			if (time[1]==60) {
 				time[0]++;
 				time[1]=0;
-			}
+			}*/
 			//電車到着時刻か？
 			if (time[0]==TrainTimeTable[j][0]&&time[1]==TrainTimeTable[j][1]) {
 				trainflag = 1;
@@ -134,13 +171,6 @@ public class Main {
 					//ran = rand.nextInt(5) + 25;
 					ran = 50;
 				}
-				/*
-				if (time[0]==9&&(time[1]==6||time[1]==13)) {
-					buff = ran;
-				}
-				else{
-					len+=ran;
-				}*/
 				j++;
 				buff += ran;
 				//応急処置
@@ -153,28 +183,32 @@ public class Main {
 			//1分半乗り換え
 			if ((plus2==time[1])||buffflag==1) {
 				buffflag=1;
-				//buff!=0
-				//buff!=0&&time[2]%2==0
-				if (buff!=0&&time[2]%2==0) {
-					len++;
-					buff--;	
-					if (buff==0) {
-						buffflag = 0;
-					}
+				int a=1;
+				if (time[0]==8||(time[0]==9&&time[1]<1)) {
+					//a=2;
 				}
+				if (buff!=0&&(time[2]%a==0&&time[3]==0)) {
+						len++;
+						buff--;	
+					}	
+				if (buff==0) {
+					buffflag = 0;
+				}
+				
 			}
 			//高坂民到着か？
 			//30秒に1回
 			//Math.random()<0.047
-			if (time[0]==8&&time[1]<59) {
+			/*if (time[0]==8&&time[1]<59) {
 				if(Math.random()<0.065){
+					System.out.println("aa");
 					takasakaflag = 1;
 					len++;
 				}
 			}else if(Math.random()<0.01){
 				takasakaflag = 1;
 				len++;
-			}
+			}*/
 			//バス到着か？
 			//出発2分前に到着
 			minus2 = BussTimeTable[k][1]-2;
@@ -197,17 +231,6 @@ public class Main {
 				} else {
 					Random rand = new Random();
 					BussPassenger = rand.nextInt(15) + 55;
-				/*if(len<=55){
-					len=0;
-				} else {
-					int ran;
-					Random rand = new Random();
-					ran = rand.nextInt(15) + 55;
-					if (len>ran) {
-						len-=ran;
-					}else{
-						len = 0;
-					}*/
 				}
 				k++;
 				//応急処置2
@@ -226,14 +249,17 @@ public class Main {
 			}
 			
 			//バスに乗り込む
-			if (time[2]%2==0) {
-				if ((len>0&&BussPassenger>0)&&IsBussExisting==1) {
-					len--;
-					BussPassenger--;
-				}	
-			}
+			Random rand2 = new Random();
+			//time[2]%2==0
+				if (time[2]%2==0&&time[3]==0) {
+					if ((len>0&&BussPassenger>0)&&IsBussExisting==1) {
+						len--;
+						BussPassenger--;
+					}	
+				}
+
 			
-			if (time[2]%10==0) {
+			if (time[2]%10==0&&time[3]==0) {
 				System.out.println(time[0]+":"+time[1]+":"+time[2]+"		"+len+"		"+takasakaflag+"		"+trainflag+"		"+bussflag);
 				//System.out.println("収容可能人数"+BussPassenger);
 				pw.println(time[0]+":"+time[1]+":"+time[2]+","+len);
