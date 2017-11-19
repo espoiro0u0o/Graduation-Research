@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -58,13 +59,55 @@ class index{
 	int[] distribution(int lambda){
 		double tau;
 		int data[] = new int[2];
+		int i=0;
 		tau = -lambda * Math.log(1.0 -Math.random());
-		data[0] = (int)tau;
+		if (tau<1000) {
+			data[0]=0;
+			data[1]=(int)tau;
+		}else{
+			data[1]=(int)tau;
+			for(i=0;tau>1000;i++){
+				tau-=1000;
+			}
+			data[0]=i;
+			data[1]=(int)tau;
+		}
+		/*data[0] = (int)tau;
 		tau = tau-(int)tau;
-		tau = tau*60;
-		data[1] = (int)tau;
+		tau = tau*100;
+		data[1] = (int)tau;*/
 		return data;
 	}
+}
+//1000ms後で直す
+class time{
+	int[] timeProcessing(int i,int time[]){
+		int msec = 0,sec;
+		int k=0;
+		msec = i;
+		while(msec>1000){
+			msec = msec-1000;
+			k++;
+		}
+		//System.out.println(k);
+		time[3] = msec;
+		if (time[3]>=1000) {
+			time[2]++;
+			time[3]-=1000;
+		}
+		if (time[2]>=60) {
+			time[1]++;
+			time[2]-=60;
+		}
+		if (time[1]>=60) {
+			time[0]++;
+			time[1]-=60;
+		}
+		//System.out.println(time[0]+""+time[1]+""+time[2]+time[3]);
+		return time;
+	}
+
+	
 }
 
 public class Main {
@@ -84,6 +127,8 @@ public class Main {
 		time[1] = 52;
 		time[2] = 0;
 		time[3] = 0;
+		int[] timebuff = new int[4];
+		Arrays.fill(timebuff, 0);
 		int[] BussExit = new int[3];
 		int sec,msec;
 		int BussPassenger=0,BussBuff=0,IsBussExisting=0;
@@ -100,46 +145,18 @@ public class Main {
 		data = test1.read1(data,buss);
 		int[][] BussTimeTable = new int [data.length][2];
 		BussTimeTable = test1.timetable(data, BussTimeTable);
-		int test[];
+		int[] bussArrive = new int[3];
+		Arrays.fill(timebuff, 0);
 		index sisu = new index();
-		test = sisu.distribution(1);
-		System.out.println(test[0]+":"+test[1]);
+		time test = new time();
+		//System.out.println(test[0]+":"+test[1]);
 		System.out.println("時間		待ち人数		高坂住到着		電車到着		バス到着");
-		//i=1630->9:18
-		for(int i=0;i<95000;i++){
+		//i=1630,97000->9:18
+		for(int i=0;i<1600000;i++){
 			int trainflag=0,bussflag=0,takasakaflag=0;
 			//時間処理
 			msec = i;
-			while(msec>60){
-				msec = msec-60;
-			}
-			time[3] = msec;
-			if (time[3]==60) {
-				time[2]++;
-				sec = time[2];
-				time[3]=0;
-			}
-			if (time[2]==60) {
-				time[1]++;
-				time[2]=0;
-			}
-			if (time[1]==60) {
-				time[0]++;
-				time[1]=0;
-			}
-			/*sec=i;
-			while(sec>60){
-				sec = sec-60;
-			}
-			time[2]=sec;
-			if (time[2]==60) {
-				time[1]++;
-				time[2]=0;
-			}
-			if (time[1]==60) {
-				time[0]++;
-				time[1]=0;
-			}*/
+			time = test.timeProcessing(msec,time);
 			//電車到着時刻か？
 			if (time[0]==TrainTimeTable[j][0]&&time[1]==TrainTimeTable[j][1]) {
 				trainflag = 1;
@@ -220,6 +237,13 @@ public class Main {
 			}
 			//バスに乗せる処理
 			if(time[0]==BussTimeTable[k][0]&&time[1]==minus2){
+				bussArrive = sisu.distribution(500);
+				timebuff[0]=time[0];
+				timebuff[1]=time[1];
+				timebuff[2]=time[2]+bussArrive[0];
+				timebuff[3]=time[3]+bussArrive[1];
+				//System.out.println("最初の指数分布");
+				//System.out.println(timebuff[0]+":"+timebuff[1]+":"+timebuff[2]+":"+timebuff[3]);
 				//バス滞在時間出す
 				for (int l = 0; l <= 2; l++) {
 					BussExit[l] = (minus2+l)%60;
@@ -247,18 +271,37 @@ public class Main {
 				}
 				IsBussExisting=0;
 			}
-			
 			//バスに乗り込む
-			Random rand2 = new Random();
-			//time[2]%2==0
-				if (time[2]%2==0&&time[3]==0) {
-					if ((len>0&&BussPassenger>0)&&IsBussExisting==1) {
-						len--;
-						BussPassenger--;
-					}	
+			if (time[0]==timebuff[0]&&time[1]==timebuff[1]&&time[2]==timebuff[2]&&time[3]==timebuff[3]) {
+				//System.out.println("if文の中");
+				//System.out.println(time[0]+":"+time[1]+":"+time[2]+":"+time[3]);
+				//System.out.println(len);
+				//&&IsBussExisting==1
+				if ((len>0&&BussPassenger>0)) {
+					len--;
+					BussPassenger--;
 				}
+				if (IsBussExisting==1) {
+					bussArrive = sisu.distribution(500);
+					timebuff[0]=time[0];
+					timebuff[1]=time[1];
+					timebuff[2]=time[2]+bussArrive[0];
+					timebuff[3]=time[3]+bussArrive[1];
+					for(int i1=3;i1>0;i1--){
+						int l=0;
+						if (i1==3) {
+							l=1000;
+						}else{
+							l=60;
+						}
+						if (timebuff[i1]>=l) {
+							timebuff[i1-1] += timebuff[i1]/l;
+							timebuff[i1] %=l;
+						}	
+					}
+				}
+			}
 
-			
 			if (time[2]%10==0&&time[3]==0) {
 				System.out.println(time[0]+":"+time[1]+":"+time[2]+"		"+len+"		"+takasakaflag+"		"+trainflag+"		"+bussflag);
 				//System.out.println("収容可能人数"+BussPassenger);
