@@ -149,6 +149,15 @@ public class Main {
 		index sisu = new index();
 		time test = new time();
 		System.out.println("時間		待ち人数		高坂住到着		電車到着		バス到着");
+		long start = System.currentTimeMillis();
+		for (int z = 0; z < 10000; z++) {
+			time[0] = 8;
+			time[1] = 52;
+			time[2] = 0;
+			time[3] = 0;
+			j=k=0;
+			norikae=1;
+			pw.println();
 		for(int i=0;i<1620000;i++){
 			int trainflag=0,bussflag=0,takasakaflag=0;
 			
@@ -190,26 +199,33 @@ public class Main {
 				//乱数発生させて待ち列に追加
 				Random rand = new Random();
 				if (time[0]==8||time[1]<5) {
-					//ran = rand.nextInt(10)+42;
-					ran = 56;
+					ran = rand.nextInt(10)+50;
+					//ran = 56;
 				}else if (time[0]==9&&time[1]==10) {
 					ran = rand.nextInt(10);
-					//ran = 4;
 				}
 				 else if (time[0]==9&&time[1]==7) {
-					 //ran = rand.nextInt(20)+78;
+					 ran = rand.nextInt(10)+85;
 						retukankaku=1000;
 						busskankaku=2400;
-					 ran = 91;
+						kirikae = 3000;
+					 //ran = 91;
 				}
 				else if (time[0]==9&&time[1]==16) {
 					ran = rand.nextInt(5)+9;
 					//ran = 22;
+				}else if (time[0]==9&&time[1]==13) {
+					 ran = rand.nextInt(10)+40;
+					//ran = 45;
+					retukankaku=1500;
+					busskankaku=1500;
+					kirikae = 2000;
 				}
 				else {
 					//ran = rand.nextInt(20) + 10;
 					//ran = rand.nextInt(5) + 25;
-					ran = 60;
+					 ran = rand.nextInt(10)+55;
+					//ran = 60;
 				}
 				j++;
 				buff2 = ran;
@@ -331,6 +347,7 @@ public class Main {
 				if (IsBussExisting==1) {
 					//25
 					if (BussPassenger<35) {
+						//System.out.println("aaa");
 						busskankaku=kirikae;
 					}
 					bussArrive = sisu.distribution(busskankaku);
@@ -352,14 +369,20 @@ public class Main {
 					}
 				}
 			}
-
-			if (time[2]%10==0&&time[3]==0) {
-				System.out.println(time[0]+":"+time[1]+":"+time[2]+"		"+len+"		"+takasakaflag+"		"+trainflag+"		"+bussflag);
-				//System.out.println("残り人数"+buff);
-				pw.println(time[0]+":"+time[1]+":"+time[2]+","+len);
+			if (time[1]>=55||time[0]==9) {
+				if (time[2]%10==0&&time[3]==0) {
+					//System.out.println(time[0]+":"+time[1]+":"+time[2]+"		"+len+"		"+takasakaflag+"		"+trainflag+"		"+bussflag);
+					//System.out.println("残り人数"+buff);
+					
+						pw.print(len+",");
+						//pw.println(time[0]+":"+time[1]+":"+time[2]+","+len);
+					
+				}	
 			}
 		}
-		pw.close();
 	}		
-	
+		pw.close();
+		long end = System.currentTimeMillis();
+		System.out.println((end - start)  + "ms");
+}
 }
